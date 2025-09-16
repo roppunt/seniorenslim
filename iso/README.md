@@ -1,1 +1,1 @@
-Plaats hier later live-build scripts. De CI bouwt nu een placeholder artefact.
+Live-build config for the SeniorenSlim ISO. Trigger the workflow manually or push to iso/**.

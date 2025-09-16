@@ -1,48 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Vereist: docker
-if ! command -v docker >/dev/null; then
-  echo "Docker vereist"; exit 1
-fi
+# Build Debian Bookworm (amd64) live ISO using live-build
+# Expects iso/config/* to exist in repo.
 
-# Build container met live-build tooling
-docker run --rm -it -v "$(pwd)":/ws debian:12 bash -lc '
-apt-get update && apt-get install -y live-build syslinux-common xorriso wget git ca-certificates
-cd /ws
-rm -rf live-build && mkdir live-build && cd live-build
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+REPO_ROOT="$(cd "${SCRIPT_DIR}/.." && pwd)"
+DIST_DIR="${REPO_ROOT}/dist"
+ISO_DIR="${REPO_ROOT}/iso"
 
-# Config
-lb config \
+mkdir -p "${DIST_DIR}"
+cd "${ISO_DIR}"
+
+# Clean any previous build
+sudo lb clean || true
+
+# Configure live-build
+sudo lb config \
+  --mode debian \
+  --distribution bookworm \
   --architectures amd64 \
   --binary-images iso-hybrid \
   --debian-installer live \
-  --distribution bookworm \
-  --apt-indices false \
-  --bootappend-live "boot=live components quiet splash locales=nl_NL.UTF-8"
-
-# Paketten (XFCE, chromium, thunderbird, rustdesk, shotwell, vlc)
-mkdir -p config/package-lists
-cat > config/package-lists/seniorenslim.list.chroot <<PKG
-xfce4 xfce4-goodies lightdm lightdm-gtk-greeter plymouth plymouth-themes
-chromium firefox-esr thunderbird vlc shotwell ufw curl unzip jq
-rustdesk fonts-dejavu-core
-PKG
-
-# Branding: skel en thema's
-mkdir -p config/includes.chroot/etc/skel
-cp -a /ws/config/desktop/skeleton/* config/includes.chroot/etc/skel/ || true
-
-# Plymouth/GRUB/LightDM thema's
-mkdir -p config/includes.chroot/usr/share/seniorenslim
-cp -a /ws/assets/branding/* config/includes.chroot/usr/share/seniorenslim/ || true
-
-# Post-install hooks (chroot)
-mkdir -p config/hooks
-cp -a /ws/scripts/B_postinstall_hooks.sh config/hooks/010-seniorenslim.chroot
+  --apt-recommends true \
+  --updates true \
+  --security true \
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --mirror-bootstrap http://deb.debian.org/debian/ \
+  --mirror-binary http://deb.debian.org/debian/ \
+  --mirror-binary-security http://deb.debian.org/debian-security/
 
 # Build
-lb build
-mv *.iso /ws/iso/seniorenslim-$(date +%Y%m%d).iso
-'
-echo "ISO klaar in ./iso/"
+sudo lb build
+
+# Move resulting ISO to dist/
+ISO_FILE="$(ls -1 *.iso | head -n1 || true)"
+if [[ -z "${ISO_FILE}" ]]; then
+  echo "ERROR: no ISO produced"
+  exit 1
+fi
+mv -f "${ISO_FILE}" "${DIST_DIR}/seniorenslim-bookworm-amd64.iso"
+echo "ISO saved to ${DIST_DIR}/seniorenslim-bookworm-amd64.iso"

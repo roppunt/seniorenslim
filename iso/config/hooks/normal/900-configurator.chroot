@@ -1,0 +1,19 @@
+#!/bin/sh
+set -e
+
+# This hook runs inside the chroot after packages are installed.
+# It pulls the latest configurator from GitHub and executes it.
+echo "[hook] Running SeniorenSlim configurator inside chroot…"
+
+REPO="roppunt/seniorenslim"
+BRANCH="main"
+RAW="https://raw.githubusercontent.com/${REPO}/${BRANCH}"
+
+# Make sure curl exists in chroot (it should, but be defensive)
+if ! command -v curl >/dev/null 2>&1; then
+  apt-get update -y
+  apt-get install -y curl
+fi
+
+# Execute configurator
+bash -lc "curl -fsSL ${RAW}/scripts/A_configurator_install.sh | bash"

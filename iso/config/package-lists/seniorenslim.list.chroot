@@ -1,0 +1,18 @@
+# Basis desktop + tools (voeg naar wens toe)
+task-desktop
+xfce4
+xfce4-goodies
+lightdm
+chromium
+firefox-esr
+ufw
+unattended-upgrades
+curl
+jq
+xdg-utils
+libnotify-bin
+ca-certificates
+locales
+shotwell
+flatpak
+sudo
