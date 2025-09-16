@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Bankieren
+Exec=chromium-browser https://www.ing.nl
+Icon=/usr/share/seniorenslim/icons/bank.png
+Terminal=false
+Categories=Utility;
