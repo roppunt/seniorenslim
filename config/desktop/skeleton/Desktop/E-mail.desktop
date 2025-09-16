@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=E-mail
+Exec=chromium-browser https://outlook.com
+Icon=/usr/share/seniorenslim/icons/email.png
+Terminal=false
+Categories=Utility;
