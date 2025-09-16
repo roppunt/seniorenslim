@@ -1,0 +1,5 @@
+[Desktop Entry]
+Type=Application
+Name=Welkom bij SeniorenSlim
+Exec=xdg-open /usr/share/seniorenslim/docs/quickstart.pdf
+X-GNOME-Autostart-enabled=true
