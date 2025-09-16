@@ -1,0 +1,9 @@
+{
+  "HomepageLocation": "https://start.seniorenslim.nl",
+  "RestoreOnStartup": 4,
+  "RestoreOnStartupURLs": ["https://start.seniorenslim.nl"],
+  "PasswordManagerEnabled": true,
+  "DefaultPopupsSetting": 2,
+  "AutofillAddressEnabled": false,
+  "AutofillCreditCardEnabled": false
+}
