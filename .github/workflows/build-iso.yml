@@ -1,0 +1,26 @@
+name: Build SeniorenSlim ISO
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+    paths:
+      - 'scripts/**'
+      - 'config/**'
+      - 'assets/**'
+      - '.github/workflows/build-iso.yml'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Enable Docker
+        run: sudo systemctl start docker
+      - name: Build ISO
+        run: bash scripts/B_build_iso.sh
+      - name: Upload ISO artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: seniorenslim-iso
+          path: iso/*.iso
