@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Internet
+Exec=chromium-browser
+Icon=/usr/share/seniorenslim/icons/internet.png
+Terminal=false
+Categories=Utility;
