@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Foto's
+Exec=shotwell
+Icon=/usr/share/seniorenslim/icons/photos.png
+Terminal=false
+Categories=Utility;
