@@ -1,0 +1,7 @@
+[Desktop Entry]
+Type=Application
+Name=Videobellen
+Exec=chromium-browser https://web.whatsapp.com
+Icon=/usr/share/seniorenslim/icons/video.png
+Terminal=false
+Categories=Utility;
