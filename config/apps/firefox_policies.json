@@ -1,0 +1,12 @@
+{
+  "policies": {
+    "Homepage": {
+      "URL": "https://start.seniorenslim.nl",
+      "Locked": false,
+      "StartPage": "homepage"
+    },
+    "DisableFirefoxStudies": true,
+    "DisablePocket": true,
+    "OfferToSaveLogins": true
+  }
+}
