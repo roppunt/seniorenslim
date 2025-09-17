@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+# Sommige live-build versies schrijven nog 'bookworm/updates' op security.debian.org,
+# maar voor Debian 12 (bookworm) hoort dit 'bookworm-security' te zijn.
+# Vervang de foute regel in /etc/apt/sources.list (in de chroot).
+
+if [ -f /etc/apt/sources.list ]; then
+  # Verwijder/vervang oude security-regel
+  sed -i 's|^\s*deb\s\+http://security\.debian\.org\s\+bookworm/updates\s\+.*||' /etc/apt/sources.list
+  # Voeg de juiste security-suite toe (als hij nog niet bestaat)
+  if ! grep -q 'deb .*debian-security.*bookworm-security' /etc/apt/sources.list; then
+    echo 'deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware' >> /etc/apt/sources.list
+  fi
+fi
