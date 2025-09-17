@@ -5,24 +5,33 @@ on:
     branches: [ main ]
     paths:
       - 'iso/**'
+      - 'scripts/B_build_iso.sh'
       - '.github/workflows/build-iso.yml'
-  workflow_dispatch: {}   # handmatig starten vanuit Actions
+  workflow_dispatch: {}
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    timeout-minutes: 120
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Placeholder build (geen Docker nodig)
+      - name: Install live-build dependencies
         run: |
-          echo "ISO build placeholder. Triggered only for iso/** or manual run." 
-          mkdir -p dist
-          printf "Placeholder build at %s\n" "$(date -u)" > dist/README.txt
+          sudo apt-get update -y
+          sudo apt-get install -y --no-install-recommends             live-build debootstrap xorriso syslinux-utils squashfs-tools cpio ca-certificates curl
 
-      - name: Upload artifact
+      - name: Ensure hook scripts are executable
+        run: |
+          chmod +x scripts/*.sh || true
+          chmod -R +x iso/config/hooks || true
+
+      - name: Build ISO
+        run: sudo bash scripts/B_build_iso.sh
+
+      - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
-          name: iso-placeholder
-          path: dist/
+          name: seniorenslim-iso
+          path: dist/*.iso
