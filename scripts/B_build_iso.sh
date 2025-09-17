@@ -23,8 +23,6 @@ sudo lb config \
   --binary-images iso-hybrid \
   --debian-installer live \
   --apt-recommends true \
-  --updates true \
-  --security true \
   --archive-areas "main contrib non-free non-free-firmware" \
   --mirror-bootstrap http://deb.debian.org/debian/ \
   --mirror-binary http://deb.debian.org/debian/ \
