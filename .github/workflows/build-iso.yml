@@ -23,7 +23,7 @@ jobs:
           sudo apt-get install -y --no-install-recommends \
             live-build debootstrap xorriso syslinux-utils squashfs-tools cpio ca-certificates curl
 
-      - name: Ensure hook/scripts executable
+      - name: Ensure hooks/scripts executable
         run: |
           chmod +x scripts/*.sh || true
           chmod -R +x iso/config/hooks || true
