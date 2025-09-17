@@ -1,0 +1,39 @@
+#!/bin/sh
+set -e
+
+# Normalize security repo for Debian 12 (bookworm):
+# - replace any 'security.debian.org bookworm/updates' with 'deb.debian.org/debian-security bookworm-security'
+# - handle BOTH classic .list AND Deb822 .sources files
+
+fix_file() {
+  f="$1"
+  [ -f "$f" ] || return 0
+
+  # For classic sources.list/.list files
+  case "$f" in
+    *.list|*/sources.list)
+      # Drop the old security line if present
+      sed -i '/security\.debian\.org.*bookworm\/updates/d' "$f"
+      # Replace possible leftovers just in case
+      sed -i -e 's|security.debian.org|deb.debian.org/debian-security|g' \
+             -e 's|bookworm/updates|bookworm-security|g' "$f"
+      ;;
+    *.sources)
+      # Deb822: adjust URIs and Suites fields safely
+      sed -i -e 's|^\s*URIs:\s\+.*security\.debian\.org.*$|URIs: http://deb.debian.org/debian-security|' \
+             -e 's|^\s*Suites:\s\+bookworm/updates|Suites: bookworm-security|' "$f"
+      ;;
+  esac
+}
+
+# Classic files
+[ -f /etc/apt/sources.list ] && fix_file /etc/apt/sources.list
+for f in /etc/apt/sources.list.d/*.list; do [ -e "$f" ] && fix_file "$f"; done
+
+# Deb822 files
+for f in /etc/apt/sources.list.d/*.sources; do [ -e "$f" ] && fix_file "$f"; done
+
+# Ensure a correct security entry exists (defensive)
+if ! grep -Rqs 'bookworm-security' /etc/apt/; then
+  echo 'deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware' >> /etc/apt/sources.list
+fi
