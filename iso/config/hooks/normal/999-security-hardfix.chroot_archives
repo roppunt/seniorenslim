@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+
+# Verwijder oude foutieve sources
+rm -f /etc/apt/sources.list.d/*updates*
+rm -f /etc/apt/sources.list.d/*security*
+
+# Schrijf correcte Deb822 security bron
+cat > /etc/apt/sources.list.d/99-seniorenslim-security.sources <<'EOF'
+Types: deb
+URIs: http://deb.debian.org/debian-security
+Suites: bookworm-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
