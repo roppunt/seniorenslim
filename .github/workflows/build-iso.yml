@@ -20,9 +20,10 @@ jobs:
       - name: Install live-build dependencies
         run: |
           sudo apt-get update -y
-          sudo apt-get install -y --no-install-recommends             live-build debootstrap xorriso syslinux-utils squashfs-tools cpio ca-certificates curl
+          sudo apt-get install -y --no-install-recommends \
+            live-build debootstrap xorriso syslinux-utils squashfs-tools cpio ca-certificates curl
 
-      - name: Ensure hook scripts are executable
+      - name: Ensure hook/scripts executable
         run: |
           chmod +x scripts/*.sh || true
           chmod -R +x iso/config/hooks || true
