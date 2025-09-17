@@ -1,0 +1,32 @@
+#!/bin/sh
+set -e
+
+# Fix APT bronnen in zowel klassieke .list als Deb822 .sources bestanden
+fix_file() {
+  f="$1"
+  [ -f "$f" ] || return 0
+  # 1) vervang oude domein + suite
+  sed -i \
+    -e 's|security.debian.org|deb.debian.org/debian-security|g' \
+    -e 's|bookworm/updates|bookworm-security|g' \
+    "$f"
+  # 2) verwijder eventuele lege of dubbele regels
+  sed -i -e '/^[[:space:]]*$/N;/^\n$/D' "$f" || true
+}
+
+# Klassiek
+[ -f /etc/apt/sources.list ] && fix_file /etc/apt/sources.list
+for f in /etc/apt/sources.list.d/*.list; do
+  [ -e "$f" ] && fix_file "$f"
+done
+
+# Deb822 (nieuw formaat in Debian 12)
+for f in /etc/apt/sources.list.d/*.sources; do
+  [ -e "$f" ] && fix_file "$f"
+done
+
+# Voeg security toe als hij nog niet bestaat (defensief)
+if ! grep -Rqs "bookworm-security" /etc/apt/; then
+  echo 'deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware' \
+    >> /etc/apt/sources.list
+fi
