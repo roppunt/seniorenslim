@@ -26,9 +26,9 @@ sudo lb config \
   --mirror-binary-security http://deb.debian.org/debian-security \
 --security true
 
-  # Remove invalid security updates repository
-  sudo find config -name "sources.list*" -type f -exec sudo sed -i '/debian-security.*bookworm\/updates/d' {} +
-
+  #   # Fix invalid security and updates repository lines by replacing with correct paths
+  sudo sed -i 's|deb.debian.org/debian-security bookworm/updates|deb.debian.org/debian-security bookworm-security|g' config/apt/sources.list config/apt/sources.list.chroot || true
+  sudo sed -i 's|bookworm/updates|bookworm-updates|g' config/apt/sources.list config/apt/sources.list.chroot || true
 
 # Build
 sudo lb build \
