@@ -35,15 +35,16 @@ sudo lb config \
   --distribution bookworm \
   --architectures amd64 \
   --binary-images iso-hybrid \
-  --debian-installer live \
+  --debian-installer false \
   --apt-recommends true \
   --archive-areas "main contrib non-free non-free-firmware" \
   --mirror-bootstrap http://deb.debian.org/debian \
-  --mirror-binary http://deb.debian.org/debian \
+  --mirror-chroot   http://deb.debian.org/debian \
+  --mirror-binary   http://deb.debian.org/debian \
   --security false \
+  --linux-packages none \
   --firmware-binary false \
-  --firmware-chroot false \
-  --linux-packages none
+  --firmware-chroot false
 
 # Provide custom apt sources to avoid invalid bookworm/updates entries
 sudo mkdir -p config/apt
