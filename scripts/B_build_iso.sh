@@ -25,8 +25,6 @@ sudo lb config \
   --archive-areas "main contrib non-free non-free-firmware" \
   --mirror-bootstrap http://deb.debian.org/debian \
   --mirror-binary http://deb.debian.org/debian \
-  --mirror-chroot-security http://deb.debian.org/debian-security \
-  --mirror-binary-security http://deb.debian.org/debian-security \
   --security false \
   --linux-packages none
 
@@ -34,10 +32,17 @@ sudo lb config \
 sudo mkdir -p config/apt
 cat > config/apt/sources.list <<'APT_EOF'
 deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
-deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian-security bookworm-security main
 APT_EOF
 sudo cp config/apt/sources.list config/apt/sources.list.chroot
+
+sudo mkdir -p config/apt/apt.conf.d
+cat > config/apt/apt.conf.d/no-content.conf <<'CONF_EOF'
+Acquire::Languages "none";
+Acquire::IndexTargets::deb::Contents "false";
+CONF_EOF
+sudo cp -r config/apt/apt.conf.d config/apt/apt.conf.d.chroot
+
 
 # Build the ISO image
 sudo lb build
