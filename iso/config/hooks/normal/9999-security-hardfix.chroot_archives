@@ -1,0 +1,42 @@
+#!/bin/sh
+set -e
+
+# Hardfix: normalize Debian security sources for bookworm
+# Remove any old security.debian.org bookworm/updates entries and replace with bookworm-security
+
+# 1) Clean all apt source files (.list and .sources) including main sources.list
+for f in /etc/apt/sources.list /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
+  [ -f "$f" ] || continue
+  # Delete lines referencing security.debian.org with bookworm/updates
+  sed -i '/security\.debian\.org.*bookworm\/updates/d' "$f" || true
+  # Normalize domain and suite names
+  sed -i -e 's|security.debian.org|deb.debian.org/debian-security|g' \
+         -e 's|bookworm/updates|bookworm-security|g' "$f" || true
+done
+
+# 2) Remove any residual files still containing bad entries (defensive)
+for f in /etc/apt/sources.list.d/*.sources /etc/apt/sources.list.d/*.list; do
+  [ -f "$f" ] || continue
+  if grep -Eq 'security\.debian\.org.*bookworm/updates' "$f"; then
+    echo "[hardfix] Removing stale $f"
+    rm -f "$f"
+  fi
+done
+
+# 3) Write a single correct Deb822 security source
+cat >/etc/apt/sources.list.d/99-seniorenslim-security.sources <<'EOF'
+Types: deb
+URIs: http://deb.debian.org/debian-security
+Suites: bookworm-security
+Components: main contrib non-free non-free-firmware
+Signed-By: /usr/share/keyrings/debian-archive-keyring.gpg
+EOF
+
+# 4) Fallback classic entry if security suite is still missing
+if ! grep -Rqs 'bookworm-security' /etc/apt/; then
+  echo 'deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware' >> /etc/apt/sources.list
+fi
+
+# 5) Final check: apt-get update must succeed
+apt-get update -y || { echo "[hardfix] apt-get update FAILED after normalization"; exit 1; }
+echo "[hardfix] apt-get update OK"
