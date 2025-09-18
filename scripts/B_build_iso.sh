@@ -11,6 +11,21 @@ ISO_DIR="${REPO_ROOT}/iso"
 mkdir -p "${DIST_DIR}"
 cd "${ISO_DIR}"
 
+sudo mkdir -p config/apt
+cat > config/apt/sources.list <<'EOF'
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian-security bookworm-security main
+EOF
+sudo cp config/apt/sources.list config/apt/sources.list.chroot
+
+sudo mkdir -p config/apt/apt.conf.d
+cat > config/apt/apt.conf.d/no-content.conf <<'EOF'
+Acquire::Languages "none";
+Acquire::IndexTargets::deb::Contents "false";
+EOF
+sudo cp -r config/apt/apt.conf.d config/apt/apt.conf.d.chroot
+
+
 # Clean previous build if any (ignore errors)
 sudo lb clean || true
 
@@ -26,6 +41,8 @@ sudo lb config \
   --mirror-bootstrap http://deb.debian.org/debian \
   --mirror-binary http://deb.debian.org/debian \
   --security false \
+  --firmware-binary false \
+  --firmware-chroot false \
   --linux-packages none
 
 # Provide custom apt sources to avoid invalid bookworm/updates entries
