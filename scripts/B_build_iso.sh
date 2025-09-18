@@ -26,12 +26,18 @@ sudo lb config \
   --mirror-binary-security http://deb.debian.org/debian-security \
 --security true
 
+  # Remove invalid security updates repository
+  sudo find config -name "sources.list*" -type f -exec sudo sed -i '/debian-security.*bookworm\/updates/d' {} +
+
 
 # Build
 sudo lb build \
   
 
 # Resultaat verplaatsen
+
+    
+
 ISO_FILE="$(ls -1 *.iso 2>/dev/null | head -n1 || true)"
 if [[ -z "${ISO_FILE}" ]]; then
   echo "ERROR: no ISO produced"
