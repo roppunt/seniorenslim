@@ -21,23 +21,24 @@ sudo lb config \
   --apt-recommends true \
   --archive-areas "main contrib non-free non-free-firmware" \
   --mirror-bootstrap http://deb.debian.org/debian \
-  --mirror-binary    http://deb.debian.org/debian \
+  --mirror-binary http://deb.debian.org/debian \
   --mirror-chroot-security http://deb.debian.org/debian-security \
   --mirror-binary-security http://deb.debian.org/debian-security \
---security true
+  --security false
 
-  #   # Fix invalid security and updates repository lines by replacing with correct paths
-  sudo sed -i 's|deb.debian.org/debian-security bookworm/updates|deb.debian.org/debian-security bookworm-security|g' config/apt/sources.list config/apt/sources.list.chroot || true
-  sudo sed -i 's|bookworm/updates|bookworm-updates|g' config/apt/sources.list config/apt/sources.list.chroot || true
+# Provide custom apt sources to avoid invalid bookworm/updates entries
+sudo mkdir -p config/apt
+cat > config/apt/sources.list <<'EOF'
+deb http://deb.debian.org/debian bookworm main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian bookworm-updates main contrib non-free non-free-firmware
+deb http://deb.debian.org/debian-security bookworm-security main contrib non-free non-free-firmware
+EOF
+sudo cp config/apt/sources.list config/apt/sources.list.chroot
 
 # Build
-sudo lb build \
-  
+sudo lb build
 
 # Resultaat verplaatsen
-
-    
-
 ISO_FILE="$(ls -1 *.iso 2>/dev/null | head -n1 || true)"
 if [[ -z "${ISO_FILE}" ]]; then
   echo "ERROR: no ISO produced"
