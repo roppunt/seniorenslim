@@ -61,6 +61,17 @@ Acquire::IndexTargets::deb::Contents "false";
 CONF_EOF
 sudo cp -r config/apt/apt.conf.d config/apt/apt.conf.d.chroot
 
+# Maak /root/isolinux aan en kopieer isolinux-bestanden
+sudo mkdir -p /root/isolinux
+# isolinux.bin bevindt zich in /usr/lib/ISOLINUX/
+if [ -f /usr/lib/ISOLINUX/isolinux.bin ]; then
+  sudo cp /usr/lib/ISOLINUX/isolinux.bin /root/isolinux/isolinux.bin
+fi
+# vesamenu.c32 bevindt zich in /usr/lib/syslinux/modules/bios/
+if [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ]; then
+  sudo cp /usr/lib/syslinux/modules/bios/vesamenu.c32 /root/isolinux/vesamenu.c32
+fi
+
 
 # Build the ISO image
 sudo lb build
