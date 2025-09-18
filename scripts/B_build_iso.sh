@@ -24,10 +24,12 @@ sudo lb config \
   --mirror-binary    http://deb.debian.org/debian \
   --mirror-chroot-security http://deb.debian.org/debian-security \
   --mirror-binary-security http://deb.debian.org/debian-security \
-  --security true 
+--security true \
+--updates false
 
 # Build
-sudo lb build
+sudo lb build \
+  
 
 # Resultaat verplaatsen
 ISO_FILE="$(ls -1 *.iso 2>/dev/null | head -n1 || true)"
