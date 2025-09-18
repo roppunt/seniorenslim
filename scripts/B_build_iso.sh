@@ -24,8 +24,8 @@ sudo lb config \
   --mirror-binary    http://deb.debian.org/debian \
   --mirror-chroot-security http://deb.debian.org/debian-security \
   --mirror-binary-security http://deb.debian.org/debian-security \
---security true \
---updates false
+--security true
+
 
 # Build
 sudo lb build \
