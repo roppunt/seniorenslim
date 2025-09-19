@@ -1,0 +1,73 @@
+diff --git a/scripts/B_build_iso.sh b/scripts/B_build_iso.sh
+index 0000000..0000001 100644
+--- a/scripts/B_build_iso.sh
++++ b/scripts/B_build_iso.sh
+@@ -1,10 +1,38 @@
+ #!/usr/bin/env bash
+-set -euo pipefail
++set -euo pipefail
++
++# --- BEGIN: ensure isolinux/syslinux files exist on Bookworm ---
++# We detect the real locations provided by syslinux-common and copy them
++# to /root/isolinux so any later 'cp /root/isolinux/…' works reliably.
++set +e
++ISO_BIN="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1)"
++VESA_MENU="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/vesamenu\.c32$' | head -n1)"
++set -e
++
++# Fallbacks for Debian 12 (Bookworm)
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/ISOLINUX/isolinux.bin ] && ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/syslinux/isolinux.bin ] && ISO_BIN=/usr/lib/syslinux/isolinux.bin
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
++
++sudo mkdir -p /root/isolinux
++[ -n "$ISO_BIN" ]   && [ -f "$ISO_BIN" ]   && sudo install -m 0644 "$ISO_BIN"   /root/isolinux/isolinux.bin
++[ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ] && sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
++# --- END: ensure isolinux/syslinux files exist on Bookworm ---
+ 
+diff --git a/iso/config/hooks/normal/00-isolinux.hook.binary b/iso/config/hooks/normal/00-isolinux.hook.binary
+index 0000000..1111111 100755
+--- a/iso/config/hooks/normal/00-isolinux.hook.binary
++++ b/iso/config/hooks/normal/00-isolinux.hook.binary
+@@ -1,999 +1,36 @@
+-#!/bin/sh -e
+-# (oude inhoud wordt vervangen)
++#!/bin/sh -e
++# live-build hook (binary stage): ensure isolinux files are available in /root/isolinux
++
++# Detect via dpkg -L (robuust over releases)
++ISO_BIN="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1)"
++VESA_MENU="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/vesamenu\.c32$' | head -n1)"
++
++# Fallbacks voor Debian 12 (Bookworm)
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/ISOLINUX/isolinux.bin ] && ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/syslinux/isolinux.bin ] && ISO_BIN=/usr/lib/syslinux/isolinux.bin
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
++
++mkdir -p /root/isolinux
++[ -n "$ISO_BIN" ]   && [ -f "$ISO_BIN" ]   && install -m 0644 "$ISO_BIN"   /root/isolinux/isolinux.bin
++[ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ] && install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
++
+diff --git a/iso/config/hooks/normal/00-isolinux.hook.chroot b/iso/config/hooks/normal/00-isolinux.hook.chroot
+index 0000000..2222222 100755
+--- a/iso/config/hooks/normal/00-isolinux.hook.chroot
++++ b/iso/config/hooks/normal/00-isolinux.hook.chroot
+@@ -1,999 +1,36 @@
+-#!/bin/sh -e
+-# (oude inhoud wordt vervangen)
++#!/bin/sh -e
++# live-build hook (chroot stage): ensure isolinux files are available in /root/isolinux inside chroot
++
++ISO_BIN="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1)"
++VESA_MENU="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/vesamenu\.c32$' | head -n1)"
++
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/ISOLINUX/isolinux.bin ] && ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin
++[ -z "$ISO_BIN" ]   && [ -f /usr/lib/syslinux/isolinux.bin ] && ISO_BIN=/usr/lib/syslinux/isolinux.bin
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
++[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
++
++mkdir -p /root/isolinux
++[ -n "$ISO_BIN" ]   && [ -f "$ISO_BIN" ]   && install -m 0644 "$ISO_BIN"   /root/isolinux/isolinux.bin
++[ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ] && install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
