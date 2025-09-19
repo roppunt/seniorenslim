@@ -1,5 +1,31 @@
 #!/usr/bin/env bash
 set -euo pipefail
+# --- fix: ensure isolinux/syslinux files exist for BIOS boot (Debian 12+) ---
+# Find actual paths provided by syslinux-common; Bookworm typically uses:
+#   /usr/lib/ISOLINUX/isolinux.bin
+#   /usr/lib/syslinux/modules/bios/vesamenu.c32
+set +e
+ISO_BIN="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1)"
+VESA_MENU="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/vesamenu\.c32$' | head -n1)"
+set -e
+# Fallbacks
+[ -z "$ISO_BIN" ] && [ -f /usr/lib/ISOLINUX/isolinux.bin ] && ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin
+[ -z "$ISO_BIN" ] && [ -f /usr/lib/syslinux/isolinux.bin ] && ISO_BIN=/usr/lib/syslinux/isolinux.bin
+[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
+[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
+
+sudo mkdir -p /root/isolinux
+if [ -n "$ISO_BIN" ] && [ -f "$ISO_BIN" ]; then
+  sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
+else
+  echo "Waarschuwing: isolinux.bin niet gevonden (syslinux-common niet volledig?); build kan later falen." >&2
+fi
+if [ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ]; then
+  sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
+else
+  echo "Waarschuwing: vesamenu.c32 niet gevonden; build kan later falen." >&2
+fi
+# --- end fix ---
 
 # Determine script and repository directories
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -18,19 +44,6 @@ deb http://deb.debian.org/debian-security bookworm-security main
 EOF
 sudo cp config/apt/sources.list config/apt/sources.list.chroot
 
-
-# --- fix: ensure isolinux files are present on Debian 12+ ---
-# syslinux places files here on bookworm:
-ISO_BIN="/usr/lib/ISOLINUX/isolinux.bin"
-VESA_MENU="/usr/lib/syslinux/modules/bios/vesamenu.c32"
-sudo mkdir -p /root/isolinux
-if [ -f "$ISO_BIN" ]; then
-  sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
-fi
-if [ -f "$VESA_MENU" ]; then
-  sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
-fi
-# --- end fix ---
 # Maak /root/isolinux aan en kopieer isolinux-bestanden
 sudo mkdir -p /root/isolinux
 # isolinux.bin bevindt zich in /usr/lib/ISOLINUX/
