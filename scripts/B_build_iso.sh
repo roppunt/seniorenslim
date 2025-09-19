@@ -78,7 +78,8 @@ sudo lb config \
   --security false \
   --linux-packages none \
   --firmware-binary false \
-  --firmware-chroot false
+  --firmware-chroot false \
+  --memtest none
 
 # ISO bouwen
 sudo lb build
