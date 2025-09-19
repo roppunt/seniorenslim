@@ -6,22 +6,60 @@ on:
     paths:
       - 'iso/**'
       - 'scripts/B_build_iso.sh'
+      - 'scripts/B_build_iso.fixed2.sh'
       - '.github/workflows/build-iso.yml'
   workflow_dispatch: {}
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04   # iets voorspelbaarder dan latest
     timeout-minutes: 120
+    env:
+      DEBIAN_FRONTEND: noninteractive
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install live-build dependencies
+      - name: Install build dependencies
         run: |
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends \
-            live-build debootstrap xorriso syslinux-utils squashfs-tools cpio ca-certificates curl
+            live-build debootstrap xorriso squashfs-tools cpio rsync \
+            syslinux-common syslinux isolinux ca-certificates curl gnupg
+
+      - name: Debug syslinux files (optional)
+        run: |
+          echo "[INFO] isolinux & vesamenu locaties uit syslinux-common:"
+          dpkg -L syslinux-common | grep -E '(ISOLINUX|syslinux)/isolinux\.bin$' || true
+          dpkg -L syslinux-common | grep -E '/vesamenu\.c32$' || true
+
+      - name: Prepare /root/isolinux (safety net)
+        run: |
+          set -e
+          sudo mkdir -p /root/isolinux
+          ISO_BIN="$(dpkg -L syslinux-common | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1 || true)"
+          VESA_MENU="$(dpkg -L syslinux-common | grep -E '/vesamenu\.c32$' | head -n1 || true)"
+
+          # Fallbacks voor mogelijke paden
+          if [ -z "$ISO_BIN" ] && [ -f /usr/lib/ISOLINUX/isolinux.bin ]; then ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin; fi
+          if [ -z "$ISO_BIN" ] && [ -f /usr/lib/syslinux/isolinux.bin ]; then ISO_BIN=/usr/lib/syslinux/isolinux.bin; fi
+          if [ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ]; then VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32; fi
+          if [ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ]; then VESA_MENU=/usr/lib/syslinux/vesamenu.c32; fi
+
+          if [ -n "$ISO_BIN" ] && [ -f "$ISO_BIN" ]; then
+            sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
+          else
+            echo "::warning::isolinux.bin niet gevonden; BIOS-boot menu kan falen"
+          fi
+
+          if [ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ]; then
+            sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
+          else
+            echo "::warning::vesamenu.c32 niet gevonden; BIOS-boot menu kan falen"
+          fi
+
+          ls -l /root/isolinux || true
 
       - name: Ensure hooks/scripts executable
         run: |
@@ -29,10 +67,17 @@ jobs:
           chmod -R +x iso/config/hooks || true
 
       - name: Build ISO
-        run: sudo bash scripts/B_build_iso.sh
+        run: |
+          # kies hier het script dat je gebruikt
+          if [ -f scripts/B_build_iso.fixed2.sh ]; then
+            sudo -E bash scripts/B_build_iso.fixed2.sh
+          else
+            sudo -E bash scripts/B_build_iso.sh
+          fi
 
       - name: Upload ISO artifact
         uses: actions/upload-artifact@v4
         with:
           name: seniorenslim-iso
           path: dist/*.iso
+          if-no-files-found: error
