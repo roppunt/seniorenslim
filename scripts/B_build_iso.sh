@@ -63,6 +63,11 @@ Acquire::IndexTargets::deb::Contents "false";
 EOF
 sudo cp -r config/apt/apt.conf.d config/apt/apt.conf.d.chroot
 
+# Zorg dat hooks uitvoerbaar zijn, ook als GitHub UI exec bit verliest
+if [ -d "iso/config/hooks/normal" ]; then
+  chmod +x iso/config/hooks/normal/*.hook.* 2>/dev/null || true
+fi
+
 
 # Clean previous build if any (ignore errors)
 sudo lb clean || true
