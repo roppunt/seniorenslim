@@ -18,6 +18,19 @@ deb http://deb.debian.org/debian-security bookworm-security main
 EOF
 sudo cp config/apt/sources.list config/apt/sources.list.chroot
 
+
+# --- fix: ensure isolinux files are present on Debian 12+ ---
+# syslinux places files here on bookworm:
+ISO_BIN="/usr/lib/ISOLINUX/isolinux.bin"
+VESA_MENU="/usr/lib/syslinux/modules/bios/vesamenu.c32"
+sudo mkdir -p /root/isolinux
+if [ -f "$ISO_BIN" ]; then
+  sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
+fi
+if [ -f "$VESA_MENU" ]; then
+  sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
+fi
+# --- end fix ---
 # Maak /root/isolinux aan en kopieer isolinux-bestanden
 sudo mkdir -p /root/isolinux
 # isolinux.bin bevindt zich in /usr/lib/ISOLINUX/
