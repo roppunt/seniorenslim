@@ -1,4 +1,6 @@
 #!/usr/bin/env bash
+set -x
+
 set -euo pipefail
 # --- fix: ensure isolinux/syslinux files exist for BIOS boot (Debian 12+) ---
 # Find actual paths provided by syslinux-common; Bookworm typically uses:
