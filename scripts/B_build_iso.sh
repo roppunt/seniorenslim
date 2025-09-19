@@ -14,6 +14,26 @@ set -e
 [ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
 [ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
 
+# --- ensure isolinux files exist on Bookworm ---
+set +e
+ISO_BIN="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/(ISOLINUX|syslinux)/isolinux\.bin$' | head -n1)"
+VESA_MENU="$(dpkg -L syslinux-common 2>/dev/null | grep -E '/vesamenu\.c32$' | head -n1)"
+set -e
+[ -z "$ISO_BIN" ]   && [ -f /usr/lib/ISOLINUX/isolinux.bin ] && ISO_BIN=/usr/lib/ISOLINUX/isolinux.bin
+[ -z "$ISO_BIN" ]   && [ -f /usr/lib/syslinux/isolinux.bin ] && ISO_BIN=/usr/lib/syslinux/isolinux.bin
+[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/modules/bios/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/modules/bios/vesamenu.c32
+[ -z "$VESA_MENU" ] && [ -f /usr/lib/syslinux/vesamenu.c32 ] && VESA_MENU=/usr/lib/syslinux/vesamenu.c32
+
+sudo mkdir -p /root/isolinux
+if [ -n "$ISO_BIN" ] && [ -f "$ISO_BIN" ]; then
+  sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
+fi
+if [ -n "$VESA_MENU" ] && [ -f "$VESA_MENU" ]; then
+  sudo install -m 0644 "$VESA_MENU" /root/isolinux/vesamenu.c32
+fi
+# --- end ensure block ---
+
+
 sudo mkdir -p /root/isolinux
 if [ -n "$ISO_BIN" ] && [ -f "$ISO_BIN" ]; then
   sudo install -m 0644 "$ISO_BIN" /root/isolinux/isolinux.bin
