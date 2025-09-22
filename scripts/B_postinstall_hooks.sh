@@ -40,7 +40,7 @@ ufw allow 21115/tcp || true
 yes | ufw enable || true
 
 # Update-buddy
-install -m 755 /usr/local/bin/update-buddy <<'SH'
+cat <<'SH' >/usr/local/bin/update-buddy
 #!/usr/bin/env bash
 set -euo pipefail
 if ! command -v apt >/dev/null 2>&1; then exit 0; fi
@@ -50,4 +50,5 @@ apt dist-upgrade -y || true
 apt autoremove -y || true
 notify-send "SeniorenSlim" "Je computer is bijgewerkt en weer veilig. 👍" || true
 SH
+chmod 755 /usr/local/bin/update-buddy
 (crontab -l 2>/dev/null; echo "0 10 * * * /usr/local/bin/update-buddy >/var/log/update-buddy.log 2>&1") | crontab - || true
