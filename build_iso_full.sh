@@ -22,7 +22,13 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
+PROJECT_DIR_PARENT="$(dirname "$SCRIPT_DIR")"
+if [[ -d "$PROJECT_DIR_PARENT/isolinux" ]]; then
+  PROJECT_DIR_DEFAULT="$PROJECT_DIR_PARENT"
+else
+  PROJECT_DIR_DEFAULT="$SCRIPT_DIR"
+fi
+PROJECT_DIR="${PROJECT_DIR:-$PROJECT_DIR_DEFAULT}"
 
 # === Jij past vooral deze aan =================================================
 STAGING_SRC="${STAGING_SRC:-$PROJECT_DIR/staging_root}"

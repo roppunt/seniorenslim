@@ -21,7 +21,8 @@ set -euo pipefail
 
 # Locaties instellen
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
-PROJECT_DIR="${PROJECT_DIR:-$SCRIPT_DIR}"
+PROJECT_DIR_DEFAULT="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="${PROJECT_DIR:-$PROJECT_DIR_DEFAULT}"
 ISO_SRC_DIR="${ISO_SRC_DIR:-$PROJECT_DIR/isolinux}"
 ALLOW_FALLBACK="${ALLOW_FALLBACK:-1}"
 
