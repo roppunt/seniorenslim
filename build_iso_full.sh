@@ -22,11 +22,20 @@ set -euo pipefail
 # ------------------------------------------------------------
 
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+codex/update-project-directory-in-iso-build-scripts
+PROJECT_DIR_PARENT="$(dirname "$SCRIPT_DIR")"
+if [[ -d "$PROJECT_DIR_PARENT/isolinux" ]]; then
+  PROJECT_DIR_DEFAULT="$PROJECT_DIR_PARENT"
+else
+  PROJECT_DIR_DEFAULT="$SCRIPT_DIR"
+fi
+PROJECT_DIR="${PROJECT_DIR:-$PROJECT_DIR_DEFAULT}"
 DEFAULT_PROJECT_DIR="$(dirname "$SCRIPT_DIR")"
 if [[ ! -d "$DEFAULT_PROJECT_DIR/isolinux" ]]; then
   DEFAULT_PROJECT_DIR="$SCRIPT_DIR"
 fi
 PROJECT_DIR="${PROJECT_DIR:-$DEFAULT_PROJECT_DIR}"
+main
 
 # === Jij past vooral deze aan =================================================
 STAGING_SRC="${STAGING_SRC:-$PROJECT_DIR/staging_root}"

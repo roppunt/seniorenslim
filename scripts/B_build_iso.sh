@@ -21,7 +21,11 @@ set -euo pipefail
 
 # Locaties instellen
 SCRIPT_DIR="$(cd -- "$(dirname "${BASH_SOURCE[0]}")" >/dev/null 2>&1 && pwd)"
+codex/update-project-directory-in-iso-build-scripts
+PROJECT_DIR_DEFAULT="$(dirname "$SCRIPT_DIR")"
+PROJECT_DIR="${PROJECT_DIR:-$PROJECT_DIR_DEFAULT}"
 PROJECT_DIR="${PROJECT_DIR:-$(dirname "$SCRIPT_DIR")}"
+main
 ISO_SRC_DIR="${ISO_SRC_DIR:-$PROJECT_DIR/isolinux}"
 ALLOW_FALLBACK="${ALLOW_FALLBACK:-1}"
 
