@@ -32,7 +32,9 @@ jobs:
           sudo apt-get update -y
           sudo apt-get install -y --no-install-recommends \
             live-build debootstrap xorriso squashfs-tools cpio rsync \
+            ubuntu-keyring \
             syslinux-common syslinux isolinux ca-certificates curl gnupg
+
 
       - name: Debug syslinux files (optional)
         run: |
