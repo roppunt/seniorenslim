@@ -21,6 +21,12 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Ensure live-build auto/config executable
+        run: |
+          if [ -f iso/auto/config ]; then
+            chmod +x iso/auto/config
+          fi
+
       - name: Install build dependencies
         run: |
           sudo apt-get update -y
