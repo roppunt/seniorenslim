@@ -10,8 +10,39 @@ need_root
 
 echo "[1/8] Packages installeren…"
 export DEBIAN_FRONTEND=noninteractive
+
+OS_ID="onbekend"
+OS_ID_LIKE=""
+if [ -r /etc/os-release ]; then
+  # shellcheck disable=SC1091
+  . /etc/os-release
+  OS_ID="${ID:-onbekend}"
+  OS_ID_LIKE="${ID_LIKE:-}"
+fi
+
+FIREFOX_PACKAGE="firefox"
+case "${OS_ID}" in
+  debian)
+    FIREFOX_PACKAGE="firefox-esr"
+    ;;
+esac
+
+echo "Distributie gedetecteerd: ${OS_ID} (${OS_ID_LIKE:-geen ID_LIKE}); gebruik ${FIREFOX_PACKAGE}."
+
 apt-get update -y
-apt-get install -y --no-install-recommends   chromium firefox-esr ufw unattended-upgrades curl jq xdg-utils   libnotify-bin ca-certificates locales shotwell flatpak
+apt-get install -y --no-install-recommends \
+  chromium \
+  "${FIREFOX_PACKAGE}" \
+  ufw \
+  unattended-upgrades \
+  curl \
+  jq \
+  xdg-utils \
+  libnotify-bin \
+  ca-certificates \
+  locales \
+  shotwell \
+  flatpak
 
 echo "[2/8] Chromium wrapper/symlink…"
 CMD="$(command -v chromium || true)"
@@ -54,12 +85,18 @@ echo "[7/8] Browser policies…"
 install -d /etc/chromium/policies/managed
 curl -fsSL "${RAW}/config/apps/chromium_policies.json"   -o /etc/chromium/policies/managed/seniorenslim.json
 
-if [ -d /usr/lib/firefox/distribution ]; then
-  curl -fsSL "${RAW}/config/apps/firefox_policies.json"     -o /usr/lib/firefox/distribution/policies.json
+FIREFOX_POLICY_DIR=""
+if command -v firefox-esr >/dev/null 2>&1; then
+  FIREFOX_POLICY_DIR="/usr/lib/firefox-esr/distribution"
+elif [ -d /usr/lib/firefox/distribution ]; then
+  FIREFOX_POLICY_DIR="/usr/lib/firefox/distribution"
 else
-  install -d /etc/firefox/policies
-  curl -fsSL "${RAW}/config/apps/firefox_policies.json"     -o /etc/firefox/policies/policies.json
+  FIREFOX_POLICY_DIR="/etc/firefox/policies"
 fi
+
+echo "Firefox-policies plaatsen in ${FIREFOX_POLICY_DIR}…"
+install -d "${FIREFOX_POLICY_DIR}"
+curl -fsSL "${RAW}/config/apps/firefox_policies.json"     -o "${FIREFOX_POLICY_DIR}/policies.json"
 
 echo "[8/8] Desktop-skeleton naar /etc/skel…"
 install -d /etc/skel/Desktop /etc/skel/.config/autostart
