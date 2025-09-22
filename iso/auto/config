@@ -3,11 +3,11 @@ set -e
 
 # Live-build config via auto/config (zonder niet-bestaande opties)
 lb config noauto \
-  --mode ubuntu \
-  --distribution jammy \
+  --mode debian \
+  --distribution bookworm \
   --architectures amd64 \
   --binary-images iso-hybrid \
-  --archive-areas "main restricted universe multiverse" \
-  --mirror-bootstrap http://archive.ubuntu.com/ubuntu \
-  --mirror-chroot    http://archive.ubuntu.com/ubuntu \
-  --mirror-binary    http://archive.ubuntu.com/ubuntu
+  --archive-areas "main contrib non-free non-free-firmware" \
+  --mirror-bootstrap http://deb.debian.org/debian \
+  --mirror-chroot    http://deb.debian.org/debian \
+  --mirror-binary    http://deb.debian.org/debian
