@@ -1,0 +1,20 @@
+#!/usr/bin/env bash
+set -e
+
+# Forceer een moderne Ubuntu-build (jammy = 22.04 LTS)
+lb config noauto \
+  --mode ubuntu \
+  --distribution jammy \
+  --architectures amd64 \
+  --binary-images iso-hybrid \
+  --archive-areas "main restricted universe multiverse" \
+  --debian-installer live \
+  --apt-indices true \
+  --updates true \
+  --security true \
+  --mirror-bootstrap http://archive.ubuntu.com/ubuntu \
+  --mirror-chroot    http://archive.ubuntu.com/ubuntu \
+  --mirror-binary    http://archive.ubuntu.com/ubuntu \
+  --parent-mirror-bootstrap http://archive.ubuntu.com/ubuntu \
+  --parent-mirror-chroot    http://archive.ubuntu.com/ubuntu \
+  --parent-mirror-binary    http://archive.ubuntu.com/ubuntu
