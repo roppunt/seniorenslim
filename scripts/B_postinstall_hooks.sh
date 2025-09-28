@@ -28,8 +28,17 @@ cat >/etc/chromium/policies/managed/seniorenslim.json <<'JSON'
 {"HomepageLocation":"https://start.seniorenslim.nl","RestoreOnStartup":4,"RestoreOnStartupURLs":["https://start.seniorenslim.nl"]}
 JSON
 
-mkdir -p /usr/lib/firefox/distribution
-cat >/usr/lib/firefox/distribution/policies.json <<'JSON'
+FIREFOX_POLICY_DIR=""
+if command -v firefox-esr >/dev/null 2>&1; then
+  FIREFOX_POLICY_DIR="/usr/lib/firefox-esr/distribution"
+elif [ -d /usr/lib/firefox/distribution ]; then
+  FIREFOX_POLICY_DIR="/usr/lib/firefox/distribution"
+else
+  FIREFOX_POLICY_DIR="/etc/firefox/policies"
+fi
+
+mkdir -p "${FIREFOX_POLICY_DIR}"
+cat >"${FIREFOX_POLICY_DIR}/policies.json" <<'JSON'
 {"policies":{"Homepage":{"URL":"https://start.seniorenslim.nl","StartPage":"homepage"}}}
 JSON
 
